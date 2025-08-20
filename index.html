@@ -1,123 +1,881 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cagnotte Kamal & Sabry</title>
-  <style>
-    .cagnotte-counter {
-      text-align: center;
-      margin: 20px;
-      font-family: Arial, sans-serif;
-    }
-    .progress-bar {
-      width: 100%;
-      background-color: #f0f0f0;
-      border-radius: 5px;
-      margin: 10px 0;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 20px;
-      background-color: #4CAF50;
-      width: 0%;
-      transition: width 0.5s;
-    }
-    #loading-error button {
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anniversaire 50 ans - Kamal & Sabry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .photo-container {
+            margin-bottom: 25px;
+        }
+
+        .photo-container img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f0f0f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            font-weight: 400;
+        }
+
+        .event-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .event-info p {
+            margin: 5px 0;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .cagnotte-counter {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .cagnotte-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .cagnotte-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .objective-text {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            margin-top: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .currency-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .currency-option {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .currency-option:hover {
+            border-color: #3498db;
+        }
+        
+        .currency-option.selected {
+            border-color: #27ae60;
+            background-color: #f1f9f5;
+        }
+        
+        .currency-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .currency-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .currency-desc {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .rib-container {
+            margin-top: 25px;
+        }
+        
+        .rib-info {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .rib-info.show {
+            display: block;
+        }
+        
+        .rib-info h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .rib-details p {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .submit-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #1a252f;
+        }
+        
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            display: none;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .phone-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .phone-prefix {
+            flex: 0 0 120px;
+        }
+
+        .phone-number {
+            flex: 1;
+        }
+
+        .confirmation-page {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .confirmation-page.show {
+            display: block;
+        }
+
+        .confirmation-page h2 {
+            color: #27ae60;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-details {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .confirmation-details h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        /* Style pour le panneau d'administration */
+        .admin-panel {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid #ddd;
+        }
+
+        .admin-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .admin-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .admin-btn:hover {
+            background: #c82333;
+        }
+
+        .admin-info {
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .admin-info p {
+            margin: 5px 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .currency-group {
+                grid-template-columns: 1fr;
+            }
+
+            .phone-group {
+                flex-direction: column;
+            }
+
+            .phone-prefix {
+                flex: none;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="cagnotte-counter">
-    <div id="totalAmountEUR">--- €</div>
-    <div id="totalAmountMAD">--- MAD</div>
-    <div id="contributorCount">---</div>
+    <div class="container">
+        <div class="header">
+            <div class="photo-container">
+                <img src="kamal-sabry.jpg" alt="Kamal & Sabry">
+            </div>
+            <h1>Anniversaire 50 ans</h1>
+            <p class="subtitle">Kamal & Sabry</p>
+            <div class="event-info">
+                <p><strong>19-20 Septembre 2025</strong></p>
+                <p><strong>Bin El Ouidane</strong></p>
+            </div>
 
-    <div class="progress-bar">
-      <div id="progressFillEUR" class="progress-fill"></div>
+            <!-- Introduction -->
+            <div class="introduction" style="margin-top: 25px; background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: left; line-height: 1.6;">
+                <p>Comme vous le savez, Kamal et Sabry fêtent leurs 50 ans ensemble les 19 et 20 septembre prochains, à Bin el Ouidane, un lieu magnifique dans le Haut Atlas au bord du lac, où nous aurons tous le plaisir de nous retrouver.</p>
+                
+                <p>À cette occasion, et pour marquer dignement cette double célébration, nous avons pris l'initiative de créer une cagnotte commune. L'idée est simple : plutôt que de multiplier les démarches individuelles, chacun pourra contribuer à un cadeau pour chacun d'eux, conçu dans le même esprit mais avec une touche personnelle.</p>
+                
+                <p>Notre objectif est de réunir au moins <strong>70 000 dirhams</strong> (soit environ <strong>7 000 euros</strong>), afin de leur offrir deux cadeaux à la hauteur de l'événement.</p>
+                
+                <p>Nous avons donc préparé ce formulaire qui permet de déclarer votre participation, de visualiser les montants déjà collectés et d'accéder aux coordonnées bancaires (RIB en dirhams ou en euros) pour effectuer directement votre virement.</p>
+                
+                <p>Nous nous chargerons ensuite de centraliser les contributions et de faire figurer l'ensemble des participants dans le message de remerciement.</p>
+                
+                <p>Merci à chacun de jouer le jeu pour que Kamal et Sabry puissent garder un souvenir exceptionnel de ce moment unique.</p>
+            </div>
+
+            <!-- Compteur de cagnotte (BLOC MIS À JOUR) -->
+            <div class="cagnotte-counter">
+                <div class="cagnotte-title">🎯 Objectif Cagnotte</div>
+                
+                <div class="cagnotte-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalAmountEUR">
+                            <div class="loading-spinner"></div> Chargement...
+                        </div>
+                        <div class="stat-label">Montant récolté (EUR)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalAmountMAD">
+                            <div class="loading-spinner"></div> 
+                        </div>
+                        <div class="stat-label">Montant récolté (MAD)</div>
+                    </div>
+                </div>
+
+                <div class="cagnotte-stats" style="margin-top:0">
+                    <div class="stat-box">
+                        <div class="stat-value" id="contributorCount">
+                            <div class="loading-spinner"></div>
+                        </div>
+                        <div class="stat-label">Contributeurs</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="last-update-time">—</div>
+                        <div class="stat-label">Dernière actualisation</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFillEUR"></div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFillMAD"></div>
+                </div>
+                
+                <div class="objective-text">
+                    Objectif : <strong>7 000 € / 70 000 MAD</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h2 style="margin-bottom: 30px; color: #2c3e50; font-weight: 600; text-align: center;">Contribution pour le cadeau commun</h2>
+            
+            <form id="contributionForm">
+                <div class="form-group">
+                    <label for="prenom">Prénom <span class="required">*</span></label>
+                    <input type="text" id="prenom" name="prenom" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nom">Nom <span class="required">*</span></label>
+                    <input type="text" id="nom" name="nom" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Téléphone portable <span class="required">*</span></label>
+                    <div class="phone-group">
+                        <select id="phonePrefix" name="phonePrefix" class="phone-prefix" required>
+                            <option value="+33">🇫🇷 +33</option>
+                            <option value="+212">🇲🇦 +212</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+49">🇩🇪 +49</option>
+                            <option value="+39">🇮🇹 +39</option>
+                            <option value="+34">🇪🇸 +34</option>
+                            <option value="+32">🇧🇪 +32</option>
+                            <option value="+41">🇨🇭 +41</option>
+                            <option value="+31">🇳🇱 +31</option>
+                        </select>
+                        <input type="tel" id="telephone" name="telephone" class="phone-number" placeholder="123456789" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="montant">Montant de contribution <span class="required">*</span></label>
+                    <input type="number" id="montant" name="montant" min="1" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Devise <span class="required">*</span></label>
+                    <div class="currency-group">
+                        <div class="currency-option" data-currency="euro">
+                            <input type="radio" id="euro" name="devise" value="euro" required>
+                            <div class="currency-label">Euro (€)</div>
+                            <div class="currency-desc">Paiement en France</div>
+                        </div>
+                        
+                        <div class="currency-option" data-currency="dirham">
+                            <input type="radio" id="dirham" name="devise" value="dirham" required>
+                            <div class="currency-label">Dirham (MAD)</div>
+                            <div class="currency-desc">Paiement au Maroc</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rib-container">
+                    <div class="rib-info" id="rib-euro">
+                        <h3>💶 Paiement en France</h3>
+                        <div class="rib-details">
+                            <p><strong>Bénéficiaire :</strong> M. ILAN BEN HAIM</p>
+                            <p><strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445</p>
+                            <p><strong>BIC :</strong> SOGEFRPP</p>
+                            <p><strong>Banque :</strong> Société Générale</p>
+                            <p><strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)</p>
+                            <p><strong>Motif :</strong> Cadeau Kamal & Sabry</p>
+                        </div>
+                    </div>
+                    
+                    <div class="rib-info" id="rib-dirham">
+                        <h3>🇲🇦 Paiement au Maroc</h3>
+                        <div class="rib-details">
+                            <p><strong>Bénéficiaire :</strong> BENHAIM ILAN ICHOA</p>
+                            <p><strong>RIB :</strong> 007 780 0002438000489014 81</p>
+                            <p><strong>IBAN :</strong> MA64 007 780 0002438000489014 81</p>
+                            <p><strong>BIC :</strong> BCMAMAMC</p>
+                            <p><strong>Banque :</strong> AttijariWafa bank</p>
+                            <p><strong>Agence :</strong> Casa Av. du Phare (0243)</p>
+                            <p><strong>Motif :</strong> Cadeau Kamal & Sabry</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Confirmer ma contribution
+                </button>
+
+                <div id="successMessage" class="message success-message">
+                    <h3 style="margin-bottom: 10px; color: #155724;">🎉 Merci pour votre contribution !</h3>
+                    <p>Votre participation pour l'anniversaire de Kamal & Sabry a été enregistrée avec succès.</p>
+                    <p><strong>Vous allez recevoir un email de confirmation</strong> avec les détails de paiement.</p>
+                    <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
+                        📅 Rendez-vous les 19-20 septembre à Bin El Ouidane !
+                    </p>
+                </div>
+
+                <div id="errorMessage" class="message error-message">
+                    ❌ Une erreur s'est produite. Veuillez réessayer.
+                </div>
+            </form>
+        </div>
+
+        <!-- Page de confirmation -->
+        <div id="confirmationPage" class="confirmation-page">
+            <h2>🎉 Contribution confirmée !</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 20px;">
+                Merci <strong id="confirmName"></strong> pour votre contribution de <strong id="confirmAmount"></strong> !
+            </p>
+            
+            <div class="confirmation-details">
+                <h3>📧 Email de confirmation envoyé</h3>
+                <p>Vous allez recevoir un email à <strong id="confirmEmail"></strong> avec :</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li>Confirmation de votre contribution</li>
+                    <li>Informations bancaires pour le paiement</li>
+                    <li>Détails de l'événement</li>
+                </ul>
+            </div>
+
+            <div id="confirmRib" class="confirmation-details">
+                <!-- RIB sera inséré ici par JavaScript -->
+            </div>
+
+            <p style="margin-top: 25px; color: #7f8c8d;">
+                📅 Rendez-vous les 19-20 septembre à Bin El Ouidane !
+            </p>
+
+            <button class="back-btn" onclick="resetForm()">
+                Nouvelle contribution
+            </button>
+        </div>
+        
+        <!-- Panneau d'administration (caché par défaut) -->
+        <div id="adminPanel" class="admin-panel">
+            <h3>🔧 Panneau d'administration</h3>
+            
+            <div class="admin-info">
+                <p><strong>État actuel du compteur :</strong></p>
+                <p>URL API : <span id="apiUrl"></span></p>
+                <p>Dernière mise à jour (admin) : <span id="lastUpdate">-</span></p>
+            </div>
+            
+            <button class="admin-btn" onclick="refreshStats()">
+                Rafraîchir les statistiques
+            </button>
+        </div>
     </div>
-    <div class="progress-bar">
-      <div id="progressFillMAD" class="progress-fill"></div>
-    </div>
-  </div>
 
-  <script>
-    // Config
-    const OBJECTIVE_EUR = 7000;
-    const OBJECTIVE_MAD = 70000;
-    const COUNTER_API_URL = "https://script.google.com/macros/s/AKfycbwPcoIxtN1EC8JYrU8Ka8z79bcz83xy1fhyTOxrZC-lYfO0L87_PzTd2vEhsD0Kaa80Bw/exec";
+    <footer>
+        <p>Made with ❤️ for Kamal & Sabry</p>
+        <!-- Bouton caché pour accéder au panneau d'administration -->
+        <p><a href="#" onclick="showAdminPanel(); return false;" style="color: #f8f9fa; font-size: 8px;">.</a></p>
+    </footer>
 
-    async function fetchCagnotteData() {
-      try {
-        const response = await fetch(`${COUNTER_API_URL}?_t=${Date.now()}`, {
-          headers: { "Accept": "application/json" },
-          cache: "no-cache"
+    <script>
+        // Configuration
+        const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/11483490/ut97dng/';
+        const OBJECTIVE_EUR = 7000;
+        const OBJECTIVE_MAD = 70000;
+        
+        // URL de l'API pour le compteur centralisé — MISE À JOUR SELON TA CONSIGNE
+        const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycbwPcoIxtN1EC8JYrU8Ka8z79bcz83xy1fhyTOxrZC-lYfO0L87_PzTd2vEhsD0Kaa80Bw/exec';
+        
+        // Gestion de la cagnotte
+        function loadCagnotteData() {
+            fetchCentralizedData();
+            updateAdminPanel();
+        }
+        
+        // Fonction pour charger les données depuis l'API centralisée (MIS À JOUR)
+        async function fetchCentralizedData() {
+            try {
+                const response = await fetch(`${COUNTER_API_URL}?_t=${Date.now()}`, {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: { 'Accept': 'application/json','Cache-Control':'no-cache' }
+                });
+                if (!response.ok) throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
+                
+                const data = await response.json();
+                if (data.error) throw new Error(data.message || 'Erreur API');
+                
+                // Mettre à jour l'affichage avec les données centralisées (EUR + MAD + contributeurs)
+                updateCagnotteDisplay(data.totalEUR, data.totalMAD, data.contributorCount);
+                
+                // Mettre à jour les dates (admin + bloc)
+                if (data.lastUpdate) {
+                    const lastUpdateElement = document.getElementById('lastUpdate');
+                    if (lastUpdateElement) lastUpdateElement.textContent = new Date(data.lastUpdate).toLocaleString('fr-FR');
+                    showLastUpdateTime(data.lastUpdate);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                // Affichage minimal d'erreur dans le bloc
+                const eur = document.getElementById('totalAmountEUR');
+                const mad = document.getElementById('totalAmountMAD');
+                const cnt = document.getElementById('contributorCount');
+                if (eur) eur.textContent = '--- €';
+                if (mad) mad.textContent = '--- MAD';
+                if (cnt) cnt.textContent = '---';
+                document.getElementById('progressFillEUR').style.width = '0%';
+                document.getElementById('progressFillMAD').style.width = '0%';
+                document.getElementById('last-update-time').textContent = '—';
+            }
+        }
+
+        // Affichage du compteur (MIS À JOUR)
+        function updateCagnotteDisplay(totalEUR, totalMAD, contributorCount) {
+            document.getElementById('totalAmountEUR').textContent = `${Math.round(totalEUR)} €`;
+            document.getElementById('totalAmountMAD').textContent = `${Math.round(totalMAD)} MAD`;
+            document.getElementById('contributorCount').textContent = `${contributorCount} contributeurs`;
+
+            const percentEUR = Math.min((totalEUR / OBJECTIVE_EUR) * 100, 100);
+            const percentMAD = Math.min((totalMAD / OBJECTIVE_MAD) * 100, 100);
+            document.getElementById('progressFillEUR').style.width = `${Math.round(percentEUR)}%`;
+            document.getElementById('progressFillMAD').style.width = `${Math.round(percentMAD)}%`;
+        }
+
+        // Afficher l’heure de dernière actualisation (NOUVEAU)
+        function showLastUpdateTime(lastUpdate) {
+            const date = new Date(lastUpdate);
+            document.getElementById('last-update-time').textContent = date.toLocaleString('fr-FR');
+        }
+
+        // Fonction pour rafraîchir manuellement les statistiques (réutilisée)
+        function refreshStats() {
+            document.getElementById('totalAmountEUR').innerHTML = '<div class="loading-spinner"></div> Chargement...';
+            document.getElementById('totalAmountMAD').innerHTML = '<div class="loading-spinner"></div> ';
+            document.getElementById('contributorCount').innerHTML = '<div class="loading-spinner"></div>';
+            fetchCentralizedData();
+        }
+        
+        // Panneau d'administration
+        function showAdminPanel() {
+            const adminPanel = document.getElementById('adminPanel');
+            if (adminPanel) {
+                adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+                updateAdminPanel();
+            }
+        }
+        function updateAdminPanel() {
+            const apiUrl = document.getElementById('apiUrl');
+            if (apiUrl) apiUrl.textContent = COUNTER_API_URL;
+        }
+        
+        // Charger les données au démarrage
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCagnotteData();
+            // Rafraîchir les données toutes les 5 minutes (identique à ton fichier)
+            setInterval(loadCagnotteData, 300000);
         });
-        if (!response.ok) throw new Error(`Erreur réseau: ${response.status}`);
 
-        const data = await response.json();
-        if (data.error) throw new Error(data.message || "Erreur API");
+        // Sélection de devise (inchangé)
+        document.querySelectorAll('.currency-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const currency = this.dataset.currency;
+                const radio = this.querySelector('input[type="radio"]');
+                document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                radio.checked = true;
+                document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
+                document.getElementById(`rib-${currency}`).classList.add('show');
+            });
+        });
 
-        updateCagnotteDisplay(data.totalEUR, data.totalMAD, data.contributorCount);
-        showLastUpdateTime(data.lastUpdate);
+        // Confirmation (inchangé)
+        function showConfirmation(data) {
+            document.querySelector('.header').style.display = 'none';
+            document.querySelector('.form-container').style.display = 'none';
+            document.getElementById('confirmationPage').classList.add('show');
+            document.getElementById('confirmName').textContent = `${data.prenom} ${data.nom}`;
+            document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise === 'euro' ? '€' : 'MAD'}`;
+            document.getElementById('confirmEmail').textContent = data.email;
+            const ribContainer = document.getElementById('confirmRib');
+            if (data.devise === 'euro') {
+                ribContainer.innerHTML = `
+                    <h3>💶 Informations de paiement - France</h3>
+                    <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
+                        <strong>Bénéficiaire :</strong> M. ILAN BEN HAIM<br>
+                        <strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445<br>
+                        <strong>BIC :</strong> SOGEFRPP<br>
+                        <strong>Banque :</strong> Société Générale<br>
+                        <strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)<br>
+                        <strong>Motif :</strong> Cadeau Kamal & Sabry
+                    </div>
+                `;
+            } else {
+                ribContainer.innerHTML = `
+                    <h3>🇲🇦 Informations de paiement - Maroc</h3>
+                    <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
+                        <strong>Bénéficiaire :</strong> BENHAIM ILAN ICHOA<br>
+                        <strong>RIB :</strong> 007 780 0002438000489014 81<br>
+                        <strong>IBAN :</strong> MA64 007 780 0002438000489014 81<br>
+                        <strong>BIC :</strong> BCMAMAMC<br>
+                        <strong>Banque :</strong> AttijariWafa bank<br>
+                        <strong>Agence :</strong> Casa Av. du Phare (0243)<br>
+                        <strong>Motif :</strong> Cadeau Kamal & Sabry
+                    </div>
+                `;
+            }
+        }
 
-      } catch (err) {
-        showLoadingError(err.message);
-        console.error("Erreur:", err);
-      }
-    }
+        // Reset (inchangé)
+        function resetForm() {
+            document.querySelector('.header').style.display = 'block';
+            document.querySelector('.form-container').style.display = 'block';
+            document.getElementById('confirmationPage').classList.remove('show');
+            document.getElementById('contributionForm').reset();
+            document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
+            loadCagnotteData();
+        }
 
-    function updateCagnotteDisplay(totalEUR, totalMAD, contributors) {
-      const errorDiv = document.getElementById("loading-error");
-      if (errorDiv) errorDiv.remove();
-
-      document.getElementById("totalAmountEUR").textContent = `${Math.round(totalEUR)} €`;
-      document.getElementById("totalAmountMAD").textContent = `${Math.round(totalMAD)} MAD`;
-      document.getElementById("contributorCount").textContent = `${contributors} contributeurs`;
-
-      const percentEUR = Math.min((totalEUR / OBJECTIVE_EUR) * 100, 100);
-      document.getElementById("progressFillEUR").style.width = `${Math.round(percentEUR)}%`;
-
-      const percentMAD = Math.min((totalMAD / OBJECTIVE_MAD) * 100, 100);
-      document.getElementById("progressFillMAD").style.width = `${Math.round(percentMAD)}%`;
-    }
-
-    function showLastUpdateTime(lastUpdate) {
-      const date = new Date(lastUpdate);
-      let updateDiv = document.getElementById("last-update-time");
-      if (!updateDiv) {
-        updateDiv = document.createElement("div");
-        updateDiv.id = "last-update-time";
-        updateDiv.style.cssText = "font-size:0.8rem;opacity:0.7;margin-top:10px;text-align:center;";
-        document.querySelector(".cagnotte-counter").appendChild(updateDiv);
-      }
-      updateDiv.textContent = `Dernière actualisation: ${date.toLocaleString("fr-FR")}`;
-    }
-
-    function showLoadingError(msg) {
-      document.getElementById("totalAmountEUR").textContent = "--- €";
-      document.getElementById("totalAmountMAD").textContent = "--- MAD";
-      document.getElementById("contributorCount").textContent = "---";
-
-      let errorDiv = document.getElementById("loading-error");
-      if (!errorDiv) {
-        errorDiv = document.createElement("div");
-        errorDiv.id = "loading-error";
-        errorDiv.style.cssText = "background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#c0392b;padding:10px;border-radius:6px;margin-top:15px;font-size:0.9rem;text-align:center;";
-        document.querySelector(".cagnotte-counter").appendChild(errorDiv);
-      }
-      errorDiv.innerHTML = `
-        ⚠️ Impossible de charger les données<br>
-        <small style="opacity:0.8;">Erreur: ${msg}</small><br>
-        <button onclick="fetchCagnotteData()" style="margin-top:8px;padding:5px 10px;background:#c0392b;color:white;border:none;border-radius:4px;">🔄 Réessayer</button>
-      `;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchCagnotteData();
-      setInterval(fetchCagnotteData, 120000);
-    });
-  </script>
+        // Soumission formulaire (inchangé)
+        document.getElementById('contributionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div> Envoi en cours...';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            const formData = new FormData(this);
+            const data = {
+                prenom: formData.get('prenom'),
+                nom: formData.get('nom'),
+                email: formData.get('email'),
+                phonePrefix: formData.get('phonePrefix'),
+                telephone: formData.get('telephone'),
+                telephoneComplet: formData.get('phonePrefix') + formData.get('telephone'),
+                montant: formData.get('montant'),
+                devise: formData.get('devise'),
+                timestamp: new Date().toLocaleString('fr-FR')
+            };
+            try {
+                await fetch(ZAPIER_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                    mode: 'no-cors'
+                });
+                setTimeout(() => { fetchCentralizedData(); }, 2000);
+                showConfirmation(data);
+            } catch (error) {
+                let errorText = '❌ Erreur lors de l\'envoi : ';
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorText += 'Problème de connexion réseau. Vérifiez votre connexion internet.';
+                } else if (error.message.includes('404')) {
+                    errorText += 'URL Zapier introuvable. Vérifiez la configuration.';
+                } else if (error.message.includes('500')) {
+                    errorText += 'Erreur serveur Zapier. Réessayez dans quelques minutes.';
+                } else {
+                    errorText += error.message || 'Erreur inconnue. Réessayez.';
+                }
+                errorMessage.innerHTML = errorText;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Votre contribution n\'a pas été enregistrée)')) {
+                        showConfirmation(data);
+                    }
+                }, 2000);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Confirmer ma contribution';
+            }
+        });
+    </script>
 </body>
 </html>
