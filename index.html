@@ -663,219 +663,317 @@
         <p><a href="#" onclick="showAdminPanel(); return false;" style="color: #f8f9fa; font-size: 8px;">.</a></p>
     </footer>
 
-    <script>
-        // Configuration
-        const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/11483490/ut97dng/';
-        const OBJECTIVE_EUR = 7000;
-        const OBJECTIVE_MAD = 70000;
-        
-        // URL de l'API pour le compteur centralisé — MISE À JOUR SELON TA CONSIGNE
-        const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycbwPcoIxtN1EC8JYrU8Ka8z79bcz83xy1fhyTOxrZC-lYfO0L87_PzTd2vEhsD0Kaa80Bw/exec';
-        
-        // Gestion de la cagnotte
-        function loadCagnotteData() {
-            fetchCentralizedData();
-            updateAdminPanel();
-        }
-        
-        // Fonction pour charger les données depuis l'API centralisée (MIS À JOUR)
-        async function fetchCentralizedData() {
-            try {
-                const response = await fetch(`${COUNTER_API_URL}?_t=${Date.now()}`, {
-                    method: 'GET',
-                    cache: 'no-cache',
-                    headers: { 'Accept': 'application/json','Cache-Control':'no-cache' }
-                });
-                if (!response.ok) throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
-                
-                const data = await response.json();
-                if (data.error) throw new Error(data.message || 'Erreur API');
-                
-                // Mettre à jour l'affichage avec les données centralisées (EUR + MAD + contributeurs)
-                updateCagnotteDisplay(data.totalEUR, data.totalMAD, data.contributorCount);
-                
-                // Mettre à jour les dates (admin + bloc)
-                if (data.lastUpdate) {
-                    const lastUpdateElement = document.getElementById('lastUpdate');
-                    if (lastUpdateElement) lastUpdateElement.textContent = new Date(data.lastUpdate).toLocaleString('fr-FR');
-                    showLastUpdateTime(data.lastUpdate);
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement des données:', error);
-                // Affichage minimal d'erreur dans le bloc
-                const eur = document.getElementById('totalAmountEUR');
-                const mad = document.getElementById('totalAmountMAD');
-                const cnt = document.getElementById('contributorCount');
-                if (eur) eur.textContent = '--- €';
-                if (mad) mad.textContent = '--- MAD';
-                if (cnt) cnt.textContent = '---';
-                document.getElementById('progressFillEUR').style.width = '0%';
-                document.getElementById('progressFillMAD').style.width = '0%';
-                document.getElementById('last-update-time').textContent = '—';
-            }
-        }
+   
+<script>
+  // =========================
+  // Configuration
+  // =========================
+  const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/11483490/ut97dng/';
+  const OBJECTIVE_EUR = 7000;
+  const OBJECTIVE_MAD = 70000;
 
-        // Affichage du compteur (MIS À JOUR)
-        function updateCagnotteDisplay(totalEUR, totalMAD, contributorCount) {
-            document.getElementById('totalAmountEUR').textContent = `${Math.round(totalEUR)} €`;
-            document.getElementById('totalAmountMAD').textContent = `${Math.round(totalMAD)} MAD`;
-            document.getElementById('contributorCount').textContent = `${contributorCount} contributeurs`;
+  // Endpoint Google Apps Script (agrégats JSON déjà calculés)
+  const COUNTER_API_URL = 'https://script.googleusercontent.com/a/macros/ibp.vc/echo?user_content_key=AehSKLgLsO9Hwm7DlX4YYxSKIM112fXsKquzfaos1q4nNvteQtzvg5S1Yq_GMu-c2wI9tWqCKGsbXlSwKpftuBRkUn-_MPtHg3abGgx2mIWy8lb5_OQIO0725oz96uw7L7krUd-HEaS8g-BDosqz5EMXlR__RZhARVpSnHy0vmOTACb7O8Cayg2mc5X3dTLu0teVqYUctEyMbKNpzrkT52zuPuiO6l5nuKSb1AoHo4DD53kltMiZ8HtbhbgEMDve4ULk8UX6NRUTsrdjX4gHRFbnNEehSbUjytTadQ4u3xDF8wECFBvxmHY&lib=MZDW_R6FiVrvoT5UuMbY0u16BXU4y6PWa';
 
-            const percentEUR = Math.min((totalEUR / OBJECTIVE_EUR) * 100, 100);
-            const percentMAD = Math.min((totalMAD / OBJECTIVE_MAD) * 100, 100);
-            document.getElementById('progressFillEUR').style.width = `${Math.round(percentEUR)}%`;
-            document.getElementById('progressFillMAD').style.width = `${Math.round(percentMAD)}%`;
-        }
+  // =========================
+  // Compteur / Cagnotte
+  // =========================
+  function loadCagnotteData() {
+    fetchCentralizedData();
+    updateAdminPanel();
+  }
 
-        // Afficher l’heure de dernière actualisation (NOUVEAU)
-        function showLastUpdateTime(lastUpdate) {
-            const date = new Date(lastUpdate);
-            document.getElementById('last-update-time').textContent = date.toLocaleString('fr-FR');
-        }
+  async function fetchCentralizedData() {
+    try {
+      const res = await fetch(`${COUNTER_API_URL}&_t=${Date.now()}`, {
+        method: 'GET',
+        cache: 'no-cache',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) throw new Error(`Erreur réseau: ${res.status} ${res.statusText}`);
 
-        // Fonction pour rafraîchir manuellement les statistiques (réutilisée)
-        function refreshStats() {
-            document.getElementById('totalAmountEUR').innerHTML = '<div class="loading-spinner"></div> Chargement...';
-            document.getElementById('totalAmountMAD').innerHTML = '<div class="loading-spinner"></div> ';
-            document.getElementById('contributorCount').innerHTML = '<div class="loading-spinner"></div>';
-            fetchCentralizedData();
-        }
-        
-        // Panneau d'administration
-        function showAdminPanel() {
-            const adminPanel = document.getElementById('adminPanel');
-            if (adminPanel) {
-                adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
-                updateAdminPanel();
-            }
-        }
-        function updateAdminPanel() {
-            const apiUrl = document.getElementById('apiUrl');
-            if (apiUrl) apiUrl.textContent = COUNTER_API_URL;
-        }
-        
-        // Charger les données au démarrage
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCagnotteData();
-            // Rafraîchir les données toutes les 5 minutes (identique à ton fichier)
-            setInterval(loadCagnotteData, 300000);
-        });
+      const data = await res.json();
+      // Attendus fournis par ton script:
+      // { totalEUR, totalMAD, contributorCount, percentComplete, lastUpdate, ... }
+      if (typeof data.totalEUR !== 'number' || typeof data.totalMAD !== 'number') {
+        throw new Error('Réponse API inattendue');
+      }
 
-        // Sélection de devise (inchangé)
-        document.querySelectorAll('.currency-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const currency = this.dataset.currency;
-                const radio = this.querySelector('input[type="radio"]');
-                document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                radio.checked = true;
-                document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
-                document.getElementById(`rib-${currency}`).classList.add('show');
-            });
-        });
+      const totalEUR = data.totalEUR;
+      const totalMAD = data.totalMAD;
+      const contributors = Number(data.contributorCount || 0);
 
-        // Confirmation (inchangé)
-        function showConfirmation(data) {
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.form-container').style.display = 'none';
-            document.getElementById('confirmationPage').classList.add('show');
-            document.getElementById('confirmName').textContent = `${data.prenom} ${data.nom}`;
-            document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise === 'euro' ? '€' : 'MAD'}`;
-            document.getElementById('confirmEmail').textContent = data.email;
-            const ribContainer = document.getElementById('confirmRib');
-            if (data.devise === 'euro') {
-                ribContainer.innerHTML = `
-                    <h3>💶 Informations de paiement - France</h3>
-                    <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
-                        <strong>Bénéficiaire :</strong> M. ILAN BEN HAIM<br>
-                        <strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445<br>
-                        <strong>BIC :</strong> SOGEFRPP<br>
-                        <strong>Banque :</strong> Société Générale<br>
-                        <strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)<br>
-                        <strong>Motif :</strong> Cadeau Kamal & Sabry
-                    </div>
-                `;
-            } else {
-                ribContainer.innerHTML = `
-                    <h3>🇲🇦 Informations de paiement - Maroc</h3>
-                    <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
-                        <strong>Bénéficiaire :</strong> BENHAIM ILAN ICHOA<br>
-                        <strong>RIB :</strong> 007 780 0002438000489014 81<br>
-                        <strong>IBAN :</strong> MA64 007 780 0002438000489014 81<br>
-                        <strong>BIC :</strong> BCMAMAMC<br>
-                        <strong>Banque :</strong> AttijariWafa bank<br>
-                        <strong>Agence :</strong> Casa Av. du Phare (0243)<br>
-                        <strong>Motif :</strong> Cadeau Kamal & Sabry
-                    </div>
-                `;
-            }
+      updateCagnotteDisplay(totalEUR, totalMAD, contributors);
+      if (data.lastUpdate) {
+        const lastUpdateElement = document.getElementById('lastUpdate');
+        if (lastUpdateElement) lastUpdateElement.textContent =
+          new Date(data.lastUpdate).toLocaleString('fr-FR');
+        showLastUpdateTime(data.lastUpdate);
+      }
+    } catch (err) {
+      console.error('[cagnotte] échec fetch:', err);
+      showLoadingError(err.message || 'Erreur inconnue');
+    }
+  }
+
+  function showLoadingError(errorMessage) {
+    // Placeholders
+    const eur = document.getElementById('totalAmountEUR');
+    const mad = document.getElementById('totalAmountMAD');
+    const cnt = document.getElementById('contributorCount');
+    if (eur) eur.textContent = '--- €';
+    if (mad) mad.textContent = '--- MAD';
+    if (cnt) cnt.textContent = '---';
+
+    const pfE = document.getElementById('progressFillEUR');
+    const pfM = document.getElementById('progressFillMAD');
+    if (pfE) pfE.style.width = '0%';
+    if (pfM) pfM.style.width = '0%';
+
+    const lu = document.getElementById('last-update-time');
+    if (lu) lu.textContent = '—';
+
+    // Message visible dans le bloc vert (si présent)
+    const cagnotteCounter = document.querySelector('.cagnotte-counter');
+    if (!cagnotteCounter) return;
+
+    let errorDiv = document.getElementById('loading-error');
+    if (!errorDiv) {
+      errorDiv = document.createElement('div');
+      errorDiv.id = 'loading-error';
+      errorDiv.style.cssText = `
+        background: rgba(231, 76, 60, 0.08);
+        border: 1px solid rgba(231, 76, 60, 0.25);
+        color: #c0392b;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 12px;
+        font-size: 0.9rem;
+        text-align: center;
+      `;
+      cagnotteCounter.appendChild(errorDiv);
+    }
+    errorDiv.innerHTML = `
+      Impossible de charger les données en temps réel<br>
+      <small style="opacity:.8">Erreur: ${errorMessage}</small><br>
+      <button onclick="refreshStats()" style="margin-top:8px;padding:6px 10px;background:#c0392b;color:#fff;border:0;border-radius:4px;cursor:pointer">
+        Réessayer
+      </button>
+    `;
+  }
+
+  function showLastUpdateTime(lastUpdate) {
+    const el = document.getElementById('last-update-time');
+    if (!el) return;
+    el.textContent = new Date(lastUpdate).toLocaleString('fr-FR');
+  }
+
+  function updateCagnotteDisplay(totalEUR, totalMAD, contributorCount) {
+    // Nettoie l'erreur si présente
+    const errorDiv = document.getElementById('loading-error');
+    if (errorDiv) errorDiv.remove();
+
+    // Montants + contributeurs
+    const eurEl = document.getElementById('totalAmountEUR');
+    const madEl = document.getElementById('totalAmountMAD');
+    const cntEl = document.getElementById('contributorCount');
+
+    if (eurEl) eurEl.textContent = `${Math.round(totalEUR)} €`;
+    if (madEl) madEl.textContent = `${Math.round(totalMAD)} MAD`;
+    if (cntEl) cntEl.textContent = `${contributorCount} contributeurs`;
+
+    // Compat: si un ancien id unique existe (totalAmount), on reflète l'EUR
+    const legacyTotal = document.getElementById('totalAmount');
+    if (legacyTotal) legacyTotal.textContent = `${Math.round(totalEUR)} €`;
+
+    // Barres de progression
+    const percentEUR = Math.min((totalEUR / OBJECTIVE_EUR) * 100, 100);
+    const percentMAD = Math.min((totalMAD / OBJECTIVE_MAD) * 100, 100);
+
+    const pfE = document.getElementById('progressFillEUR');
+    const pfM = document.getElementById('progressFillMAD');
+    if (pfE) pfE.style.width = `${Math.round(percentEUR)}%`;
+    if (pfM) pfM.style.width = `${Math.round(percentMAD)}%`;
+
+    // Compat: ancienne barre unique
+    const legacyBar = document.getElementById('progressFill');
+    if (legacyBar) legacyBar.style.width = `${Math.round(percentEUR)}%`;
+  }
+
+  function refreshStats() {
+    const eur = document.getElementById('totalAmountEUR');
+    const mad = document.getElementById('totalAmountMAD');
+    const cnt = document.getElementById('contributorCount');
+    if (eur) eur.innerHTML = 'Chargement...';
+    if (mad) mad.innerHTML = 'Chargement...';
+    if (cnt) cnt.innerHTML = '...';
+    fetchCentralizedData();
+  }
+
+  function showAdminPanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    if (adminPanel) {
+      adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+      updateAdminPanel();
+    }
+  }
+
+  function updateAdminPanel() {
+    const apiUrl = document.getElementById('apiUrl');
+    if (apiUrl) apiUrl.textContent = COUNTER_API_URL;
+  }
+
+  // =========================
+  // Bootstrap
+  // =========================
+  document.addEventListener('DOMContentLoaded', function() {
+    // Vérif silencieuse des IDs requis
+    ['totalAmountEUR','totalAmountMAD','contributorCount','progressFillEUR','progressFillMAD','last-update-time']
+      .forEach(id => { if (!document.getElementById(id)) console.warn('[cagnotte] ID manquant:', id); });
+
+    loadCagnotteData();
+    // Rafraîchit toutes les 2 minutes
+    setInterval(loadCagnotteData, 120000);
+  });
+
+  // =========================
+  // Gestion devise (inchangé)
+  // =========================
+  document.querySelectorAll('.currency-option').forEach(option => {
+    option.addEventListener('click', function() {
+      const currency = this.dataset.currency;
+      const radio = this.querySelector('input[type="radio"]');
+
+      document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+      this.classList.add('selected');
+      if (radio) radio.checked = true;
+
+      document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
+      const ribBox = document.getElementById(`rib-${currency}`);
+      if (ribBox) ribBox.classList.add('show');
+    });
+  });
+
+  // =========================
+  // Page de confirmation (inchangé)
+  // =========================
+  function showConfirmation(data) {
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.form-container').style.display = 'none';
+    document.getElementById('confirmationPage').classList.add('show');
+
+    document.getElementById('confirmName').textContent = `${data.prenom} ${data.nom}`;
+    document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise === 'euro' ? '€' : 'MAD'}`;
+    document.getElementById('confirmEmail').textContent = data.email;
+
+    const ribContainer = document.getElementById('confirmRib');
+    if (data.devise === 'euro') {
+      ribContainer.innerHTML = `
+        <h3>Informations de paiement - France</h3>
+        <div style="background:#fff;padding:16px;border-radius:4px;font-family:monospace;line-height:1.8;">
+          <strong>Bénéficiaire :</strong> M. ILAN BEN HAIM<br>
+          <strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445<br>
+          <strong>BIC :</strong> SOGEFRPP<br>
+          <strong>Banque :</strong> Société Générale<br>
+          <strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)<br>
+          <strong>Motif :</strong> Cadeau Kamal & Sabry
+        </div>
+      `;
+    } else {
+      ribContainer.innerHTML = `
+        <h3>Informations de paiement - Maroc</h3>
+        <div style="background:#fff;padding:16px;border-radius:4px;font-family:monospace;line-height:1.8;">
+          <strong>Bénéficiaire :</strong> BENHAIM ILAN ICHOA<br>
+          <strong>RIB :</strong> 007 780 0002438000489014 81<br>
+          <strong>IBAN :</strong> MA64 007 780 0002438000489014 81<br>
+          <strong>BIC :</strong> BCMAMAMC<br>
+          <strong>Banque :</strong> AttijariWafa bank<br>
+          <strong>Agence :</strong> Casa Av. du Phare (0243)<br>
+          <strong>Motif :</strong> Cadeau Kamal & Sabry
+        </div>
+      `;
+    }
+  }
+
+  // =========================
+  // Reset (inchangé)
+  // =========================
+  function resetForm() {
+    document.querySelector('.header').style.display = 'block';
+    document.querySelector('.form-container').style.display = 'block';
+    document.getElementById('confirmationPage').classList.remove('show');
+    document.getElementById('contributionForm').reset();
+
+    document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+    document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
+
+    loadCagnotteData();
+  }
+
+  // =========================
+  // Soumission du formulaire (Zapier) – inchangé
+  // =========================
+  document.getElementById('contributionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submitBtn');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="loading-spinner"></div> Envoi en cours...';
+    successMessage.style.display = 'none';
+    errorMessage.style.display = 'none';
+
+    const formData = new FormData(this);
+    const data = {
+      prenom: formData.get('prenom'),
+      nom: formData.get('nom'),
+      email: formData.get('email'),
+      phonePrefix: formData.get('phonePrefix'),
+      telephone: formData.get('telephone'),
+      telephoneComplet: (formData.get('phonePrefix') || '') + (formData.get('telephone') || ''),
+      montant: formData.get('montant'),
+      devise: formData.get('devise'),
+      timestamp: new Date().toLocaleString('fr-FR')
+    };
+
+    try {
+      await fetch(ZAPIER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        mode: 'no-cors'
+      });
+
+      showConfirmation(data);
+      setTimeout(fetchCentralizedData, 3000); // laisse le temps au sheet de s’actualiser
+    } catch (error) {
+      console.error('Erreur détaillée:', error);
+      let errorText = 'Erreur lors de l\'envoi : ';
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorText += 'Problème de connexion réseau.';
+      } else if (error.message && error.message.includes('404')) {
+        errorText += 'URL Zapier introuvable.';
+      } else if (error.message && error.message.includes('500')) {
+        errorText += 'Erreur serveur Zapier.';
+      } else {
+        errorText += error.message || 'Erreur inconnue.';
+      }
+      errorMessage.innerHTML = errorText;
+      errorMessage.style.display = 'block';
+
+      setTimeout(() => {
+        if (confirm('Voir un aperçu de la confirmation ? (Votre contribution n\'a peut-être pas été enregistrée)')) {
+          showConfirmation(data);
         }
-
-        // Reset (inchangé)
-        function resetForm() {
-            document.querySelector('.header').style.display = 'block';
-            document.querySelector('.form-container').style.display = 'block';
-            document.getElementById('confirmationPage').classList.remove('show');
-            document.getElementById('contributionForm').reset();
-            document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
-            document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
-            loadCagnotteData();
-        }
-
-        // Soumission formulaire (inchangé)
-        document.getElementById('contributionForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading-spinner"></div> Envoi en cours...';
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'none';
-            const formData = new FormData(this);
-            const data = {
-                prenom: formData.get('prenom'),
-                nom: formData.get('nom'),
-                email: formData.get('email'),
-                phonePrefix: formData.get('phonePrefix'),
-                telephone: formData.get('telephone'),
-                telephoneComplet: formData.get('phonePrefix') + formData.get('telephone'),
-                montant: formData.get('montant'),
-                devise: formData.get('devise'),
-                timestamp: new Date().toLocaleString('fr-FR')
-            };
-            try {
-                await fetch(ZAPIER_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                    mode: 'no-cors'
-                });
-                setTimeout(() => { fetchCentralizedData(); }, 2000);
-                showConfirmation(data);
-            } catch (error) {
-                let errorText = '❌ Erreur lors de l\'envoi : ';
-                if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    errorText += 'Problème de connexion réseau. Vérifiez votre connexion internet.';
-                } else if (error.message.includes('404')) {
-                    errorText += 'URL Zapier introuvable. Vérifiez la configuration.';
-                } else if (error.message.includes('500')) {
-                    errorText += 'Erreur serveur Zapier. Réessayez dans quelques minutes.';
-                } else {
-                    errorText += error.message || 'Erreur inconnue. Réessayez.';
-                }
-                errorMessage.innerHTML = errorText;
-                errorMessage.style.display = 'block';
-                setTimeout(() => {
-                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Votre contribution n\'a pas été enregistrée)')) {
-                        showConfirmation(data);
-                    }
-                }, 2000);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Confirmer ma contribution';
-            }
-        });
-    </script>
+      }, 2000);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Confirmer ma contribution';
+    }
+  });
+</script>
+   
 </body>
 </html>
