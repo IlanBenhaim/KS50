@@ -1,322 +1,123 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cagnotte Kamal & Sabry</title>
-    <style>
-        /* Ajoute ici ton CSS existant */
-        .cagnotte-counter {
-            text-align: center;
-            margin: 20px;
-            font-family: Arial, sans-serif;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 20px;
-            background-color: #4CAF50;
-            width: 0%;
-            transition: width 0.5s;
-        }
-        #loading-error button {
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cagnotte Kamal & Sabry</title>
+  <style>
+    .cagnotte-counter {
+      text-align: center;
+      margin: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .progress-bar {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 20px;
+      background-color: #4CAF50;
+      width: 0%;
+      transition: width 0.5s;
+    }
+    #loading-error button {
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <!-- Ajoute ici le reste de ton HTML existant -->
-    <div class="cagnotte-counter">
-        <div id="totalAmountEUR">--- €</div>
-        <div id="totalAmountMAD">--- MAD</div>
-        <div id="contributorCount">---</div>
-        <div class="progress-bar">
-            <div id="progressFillEUR" class="progress-fill"></div>
-        </div>
-        <div class="progress-bar">
-            <div id="progressFillMAD" class="progress-fill"></div>
-        </div>
+  <div class="cagnotte-counter">
+    <div id="totalAmountEUR">--- €</div>
+    <div id="totalAmountMAD">--- MAD</div>
+    <div id="contributorCount">---</div>
+
+    <div class="progress-bar">
+      <div id="progressFillEUR" class="progress-fill"></div>
     </div>
+    <div class="progress-bar">
+      <div id="progressFillMAD" class="progress-fill"></div>
+    </div>
+  </div>
 
-    <!-- Script mis à jour -->
-    <script>
-        // Configuration
-        const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/11483490/ut97dng/';
-        const OBJECTIVE_EUR = 7000;
-        const OBJECTIVE_MAD = 70000;
-        const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycbwPcoIxtN1EC8JYrU8Ka8z79bcz83xy1fhyTOxrZC-lYfO0L87_PzTd2vEhsD0Kaa800Bw/exec';
+  <script>
+    // Config
+    const OBJECTIVE_EUR = 7000;
+    const OBJECTIVE_MAD = 70000;
+    const COUNTER_API_URL = "https://script.google.com/macros/s/AKfycbwPcoIxtN1EC8JYrU8Ka8z79bcz83xy1fhyTOxrZC-lYfO0L87_PzTd2vEhsD0Kaa80Bw/exec";
 
-        // Fonction pour charger les données depuis l'API
-        async function fetchCagnotteData() {
-            try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`${COUNTER_API_URL}?_t=${timestamp}`, {
-                    method: 'GET',
-                    cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log('Données reçues:', data);
-
-                if (data.error) {
-                    throw new Error(data.message || 'Erreur API');
-                }
-
-                // Mettre à jour l'affichage
-                updateCagnotteDisplay(data.totalEUR, data.totalMAD, data.contributorCount);
-
-                // Afficher l'heure de dernière mise à jour
-                showLastUpdateTime(data.lastUpdate);
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showLoadingError(error.message);
-            }
-        }
-
-        // Fonction pour afficher les erreurs de chargement
-        function showLoadingError(errorMessage) {
-            document.getElementById('totalAmountEUR').textContent = '--- €';
-            document.getElementById('totalAmountMAD').textContent = '--- MAD';
-            document.getElementById('contributorCount').textContent = '---';
-
-            let errorDiv = document.getElementById('loading-error');
-            if (!errorDiv) {
-                errorDiv = document.createElement('div');
-                errorDiv.id = 'loading-error';
-                errorDiv.style.cssText = `
-                    background: rgba(231, 76, 60, 0.1);
-                    border: 1px solid rgba(231, 76, 60, 0.3);
-                    color: #c0392b;
-                    padding: 10px;
-                    border-radius: 6px;
-                    margin-top: 15px;
-                    font-size: 0.9rem;
-                    text-align: center;
-                `;
-                document.querySelector('.cagnotte-counter').appendChild(errorDiv);
-            }
-
-            errorDiv.innerHTML = `
-                ⚠️ Impossible de charger les données<br>
-                <small style="opacity: 0.8;">Erreur: ${errorMessage}</small><br>
-                <button onclick="fetchCagnotteData()" style="margin-top: 8px; padding: 5px 10px; background: #c0392b; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    🔄 Réessayer
-                </button>
-            `;
-        }
-
-        // Fonction pour afficher l'heure de dernière mise à jour
-        function showLastUpdateTime(lastUpdate) {
-            const date = new Date(lastUpdate);
-            const timeString = date.toLocaleString('fr-FR');
-
-            let updateDiv = document.getElementById('last-update-time');
-            if (!updateDiv) {
-                updateDiv = document.createElement('div');
-                updateDiv.id = 'last-update-time';
-                updateDiv.style.cssText = `
-                    font-size: 0.8rem;
-                    opacity: 0.7;
-                    margin-top: 10px;
-                    text-align: center;
-                `;
-                document.querySelector('.cagnotte-counter').appendChild(updateDiv);
-            }
-
-            updateDiv.textContent = `Dernière actualisation: ${timeString}`;
-        }
-
-        // Fonction pour mettre à jour l'affichage de la cagnotte
-        function updateCagnotteDisplay(totalEUR, totalMAD, contributorCount) {
-            // Supprimer le message d'erreur s'il existe
-            const errorDiv = document.getElementById('loading-error');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-
-            // Mettre à jour les montants et le nombre de contributeurs
-            document.getElementById('totalAmountEUR').textContent = `${Math.round(totalEUR)} €`;
-            document.getElementById('totalAmountMAD').textContent = `${Math.round(totalMAD)} MAD`;
-            document.getElementById('contributorCount').textContent = contributorCount;
-
-            // Calculer et afficher le pourcentage de complétion (EUR)
-            const percentCompleteEUR = Math.min((totalEUR / OBJECTIVE_EUR) * 100, 100);
-            document.getElementById('progressFillEUR').style.width = `${Math.round(percentCompleteEUR)}%`;
-
-            // Calculer et afficher le pourcentage de complétion (MAD)
-            const percentCompleteMAD = Math.min((totalMAD / OBJECTIVE_MAD) * 100, 100);
-            document.getElementById('progressFillMAD').style.width = `${Math.round(percentCompleteMAD)}%`;
-        }
-
-        // Charger les données au démarrage
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchCagnotteData();
-
-            // Rafraîchir les données toutes les 2 minutes
-            setInterval(fetchCagnotteData, 120000);
+    async function fetchCagnotteData() {
+      try {
+        const response = await fetch(`${COUNTER_API_URL}?_t=${Date.now()}`, {
+          headers: { "Accept": "application/json" },
+          cache: "no-cache"
         });
+        if (!response.ok) throw new Error(`Erreur réseau: ${response.status}`);
 
-        // Gestion de la sélection de devise (si nécessaire)
-        document.querySelectorAll('.currency-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const currency = this.dataset.currency;
-                const radio = this.querySelector('input[type="radio"]');
+        const data = await response.json();
+        if (data.error) throw new Error(data.message || "Erreur API");
 
-                document.querySelectorAll('.currency-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
+        updateCagnotteDisplay(data.totalEUR, data.totalMAD, data.contributorCount);
+        showLastUpdateTime(data.lastUpdate);
 
-                this.classList.add('selected');
-                radio.checked = true;
+      } catch (err) {
+        showLoadingError(err.message);
+        console.error("Erreur:", err);
+      }
+    }
 
-                document.querySelectorAll('.rib-info').forEach(rib => {
-                    rib.classList.remove('show');
-                });
+    function updateCagnotteDisplay(totalEUR, totalMAD, contributors) {
+      const errorDiv = document.getElementById("loading-error");
+      if (errorDiv) errorDiv.remove();
 
-                document.getElementById(`rib-${currency}`).classList.add('show');
-            });
-        });
+      document.getElementById("totalAmountEUR").textContent = `${Math.round(totalEUR)} €`;
+      document.getElementById("totalAmountMAD").textContent = `${Math.round(totalMAD)} MAD`;
+      document.getElementById("contributorCount").textContent = `${contributors} contributeurs`;
 
-        // Gestion du formulaire (si nécessaire)
-        document.getElementById('contributionForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
+      const percentEUR = Math.min((totalEUR / OBJECTIVE_EUR) * 100, 100);
+      document.getElementById("progressFillEUR").style.width = `${Math.round(percentEUR)}%`;
 
-            const submitBtn = document.getElementById('submitBtn');
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
+      const percentMAD = Math.min((totalMAD / OBJECTIVE_MAD) * 100, 100);
+      document.getElementById("progressFillMAD").style.width = `${Math.round(percentMAD)}%`;
+    }
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading-spinner"></div> Envoi en cours...';
+    function showLastUpdateTime(lastUpdate) {
+      const date = new Date(lastUpdate);
+      let updateDiv = document.getElementById("last-update-time");
+      if (!updateDiv) {
+        updateDiv = document.createElement("div");
+        updateDiv.id = "last-update-time";
+        updateDiv.style.cssText = "font-size:0.8rem;opacity:0.7;margin-top:10px;text-align:center;";
+        document.querySelector(".cagnotte-counter").appendChild(updateDiv);
+      }
+      updateDiv.textContent = `Dernière actualisation: ${date.toLocaleString("fr-FR")}`;
+    }
 
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'none';
+    function showLoadingError(msg) {
+      document.getElementById("totalAmountEUR").textContent = "--- €";
+      document.getElementById("totalAmountMAD").textContent = "--- MAD";
+      document.getElementById("contributorCount").textContent = "---";
 
-            const formData = new FormData(this);
-            const data = {
-                prenom: formData.get('prenom'),
-                nom: formData.get('nom'),
-                email: formData.get('email'),
-                phonePrefix: formData.get('phonePrefix'),
-                telephone: formData.get('telephone'),
-                telephoneComplet: formData.get('phonePrefix') + formData.get('telephone'),
-                montant: formData.get('montant'),
-                devise: formData.get('devise'),
-                timestamp: new Date().toLocaleString('fr-FR')
-            };
+      let errorDiv = document.getElementById("loading-error");
+      if (!errorDiv) {
+        errorDiv = document.createElement("div");
+        errorDiv.id = "loading-error";
+        errorDiv.style.cssText = "background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#c0392b;padding:10px;border-radius:6px;margin-top:15px;font-size:0.9rem;text-align:center;";
+        document.querySelector(".cagnotte-counter").appendChild(errorDiv);
+      }
+      errorDiv.innerHTML = `
+        ⚠️ Impossible de charger les données<br>
+        <small style="opacity:0.8;">Erreur: ${msg}</small><br>
+        <button onclick="fetchCagnotteData()" style="margin-top:8px;padding:5px 10px;background:#c0392b;color:white;border:none;border-radius:4px;">🔄 Réessayer</button>
+      `;
+    }
 
-            try {
-                const response = await fetch(ZAPIER_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                    mode: 'no-cors'
-                });
-
-                console.log('Réponse Zapier:', response);
-                showConfirmation(data);
-
-                setTimeout(fetchCagnotteData, 3000);
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                let errorText = '⚠️ Erreur lors de l\'envoi : ';
-                if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    errorText += 'Problème de connexion réseau.';
-                } else if (error.message.includes('404')) {
-                    errorText += 'URL Zapier introuvable.';
-                } else if (error.message.includes('500')) {
-                    errorText += 'Erreur serveur Zapier.';
-                } else {
-                    errorText += error.message || 'Erreur inconnue.';
-                }
-
-                errorMessage.innerHTML = errorText;
-                errorMessage.style.display = 'block';
-
-                setTimeout(() => {
-                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Votre contribution n\'a pas été enregistrée)')) {
-                        showConfirmation(data);
-                    }
-                }, 2000);
-
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Confirmer ma contribution';
-            }
-        });
-
-        // Fonction pour afficher la page de confirmation (si nécessaire)
-        function showConfirmation(data) {
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.form-container').style.display = 'none';
-            document.getElementById('confirmationPage').classList.add('show');
-
-            document.getElementById('confirmName').textContent = `${data.prenom} ${data.nom}`;
-            document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise === 'euro' ? '€' : 'MAD'}`;
-            document.getElementById('confirmEmail').textContent = data.email;
-
-            const ribContainer = document.getElementById('confirmRib');
-            if (data.devise === 'euro') {
-                ribContainer.innerHTML = `
-                    <h3>💶 Informations de paiement - France</h3>
-                    <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
-                        <strong>Bénéficiaire :</strong> M. ILAN BEN HAIM<br>
-                        <strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445<br>
-                        <strong>BIC :</strong> SOGEFRPP<br>
-                        <strong>Banque :</strong> Société Générale<br>
-                        <strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)<br>
-                        <strong>Motif :</strong> Cadeau Kamal & Sabry
-                    </div>
-                `;
-            } else {
-                ribContainer.innerHTML = `
-                    <h3>🇲🇦 Informations de paiement - Maroc</h3>
-                    <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
-                        <strong>Bénéficiaire :</strong> BENHAIM ILAN ICHOA<br>
-                        <strong>RIB :</strong> 007 780 0002438000489014 81<br>
-                        <strong>IBAN :</strong> MA64 007 780 0002438000489014 81<br>
-                        <strong>BIC :</strong> BCMAMAMC<br>
-                        <strong>Banque :</strong> AttijariWafa bank<br>
-                        <strong>Agence :</strong> Casa Av. du Phare (0243)<br>
-                        <strong>Motif :</strong> Cadeau Kamal & Sabry
-                    </div>
-                `;
-            }
-        }
-
-        // Fonction pour réinitialiser le formulaire (si nécessaire)
-        function resetForm() {
-            document.querySelector('.header').style.display = 'block';
-            document.querySelector('.form-container').style.display = 'block';
-            document.getElementById('confirmationPage').classList.remove('show');
-            document.getElementById('contributionForm').reset();
-
-            document.querySelectorAll('.currency-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-
-            document.querySelectorAll('.rib-info').forEach(rib => {
-                rib.classList.remove('show');
-            });
-
-            fetchCagnotteData();
-        }
-    </script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchCagnotteData();
+      setInterval(fetchCagnotteData, 120000);
+    });
+  </script>
 </body>
 </html>
