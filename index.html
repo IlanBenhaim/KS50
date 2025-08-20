@@ -551,8 +551,8 @@
         const EXCHANGE_RATE = 10; // 1 EUR = 10 MAD (approximatif)
         
         // URL de l'API pour le compteur centralisé (à remplacer par votre URL de déploiement Google Apps Script)
-        const COUNTER_API_URL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI';
-        const USE_CENTRALIZED_COUNTER = false; // Mettre à true une fois l'API configurée
+        const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycbwSiezxBcc3_8KvAp8Osj2eyfVcYJWvkl0qYwsjyiJnbRzbSRaLOX4RGP_nX4oAsxJxPQ/exec';
+        const USE_CENTRALIZED_COUNTER = true; // Mettre à true une fois l'API configurée
 
         // Gestion de la cagnotte
         function loadCagnotteData() {
@@ -634,6 +634,9 @@
         // Charger les données au démarrage
         document.addEventListener('DOMContentLoaded', function() {
             loadCagnotteData();
+            
+            // Rafraîchir les données toutes les 5 minutes
+            setInterval(loadCagnotteData, 300000);
         });
 
         // Gestion de la sélection de devise
