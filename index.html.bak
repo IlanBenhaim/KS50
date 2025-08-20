@@ -393,22 +393,6 @@
             font-size: 0.9rem;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -466,15 +450,11 @@
                 
                 <div class="cagnotte-stats">
                     <div class="stat-box">
-                        <div class="stat-value" id="totalAmount">
-                            <div class="loading-spinner"></div> Chargement...
-                        </div>
+                        <div class="stat-value" id="totalAmount">0 €</div>
                         <div class="stat-label">Montant récolté</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value" id="contributorCount">
-                            <div class="loading-spinner"></div>
-                        </div>
+                        <div class="stat-value" id="contributorCount">0</div>
                         <div class="stat-label">Contributeurs</div>
                     </div>
                 </div>
@@ -631,13 +611,17 @@
             
             <div class="admin-info">
                 <p><strong>État actuel du compteur :</strong></p>
+                <p>Mode API centralisée : <span id="apiStatus"></span></p>
                 <p>URL API : <span id="apiUrl"></span></p>
-                <p>Dernière mise à jour : <span id="lastUpdate">-</span></p>
+                <p>Contributions locales : <span id="localContribCount">0</span></p>
             </div>
             
-            <button class="admin-btn" onclick="refreshStats()">
-                Rafraîchir les statistiques
+            <button class="admin-btn" onclick="resetLocalCounter()">
+                Réinitialiser le compteur local
             </button>
+            <p style="font-size: 12px; margin-top: 5px; color: #6c757d;">
+                Cette action effacera toutes les contributions stockées localement dans ce navigateur.
+            </p>
         </div>
     </div>
 
@@ -652,81 +636,99 @@
         const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/11483490/ut97dng/';
         const OBJECTIVE_EUR = 7000;
         const OBJECTIVE_MAD = 70000;
+        const EXCHANGE_RATE = 10; // 1 EUR = 10 MAD (approximatif)
         
-        // URL de l'API pour le compteur centralisé
-        const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycbw_9ZCTbPyx8qXBuWjTar3ZeTb8SXMVJbQYgkPF9MOPIgPfdDZupEvuV6jV9kk-GXnEdw/exec';
-        
+        // URL de l'API pour le compteur centralisé (à remplacer par votre URL de déploiement Google Apps Script)
+        const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycbwSiezxBcc3_8KvAp8Osj2eyfVcYJWvkl0qYwsjyiJnbRzbSRaLOX4RGP_nX4oAsxJxPQ/exec';
+        const USE_CENTRALIZED_COUNTER = true; // Mettre à true une fois l'API configurée
+
         // Gestion de la cagnotte
         function loadCagnotteData() {
-            fetchCentralizedData();
+            if (USE_CENTRALIZED_COUNTER) {
+                // Utiliser l'API centralisée
+                fetchCentralizedData();
+            } else {
+                // Utiliser le stockage local (mode démo ou fallback)
+                loadLocalCagnotteData();
+            }
+            
+            // Mettre à jour les informations du panneau d'administration
             updateAdminPanel();
         }
         
         // Fonction pour charger les données depuis l'API centralisée
         async function fetchCentralizedData() {
             try {
-                console.log('Tentative de récupération des données depuis:', COUNTER_API_URL);
-                
-                const response = await fetch(COUNTER_API_URL, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                console.log('Réponse reçue:', response);
-                
+                const response = await fetch(COUNTER_API_URL);
                 if (!response.ok) {
-                    throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
+                    throw new Error('Erreur réseau');
                 }
                 
                 const data = await response.json();
-                console.log('Données reçues:', data);
-                
                 if (data.error) {
                     throw new Error(data.message || 'Erreur API');
                 }
                 
                 // Mettre à jour l'affichage avec les données centralisées
-                updateCagnotteDisplay(data.totalEUR, data.contributorCount, data.percentComplete);
-                
-                // Mettre à jour la date de dernière mise à jour
-                if (data.lastUpdate) {
-                    const lastUpdateElement = document.getElementById('lastUpdate');
-                    if (lastUpdateElement) {
-                        const date = new Date(data.lastUpdate);
-                        lastUpdateElement.textContent = date.toLocaleString('fr-FR');
-                    }
-                }
+                updateCagnotteDisplay(data.totalEUR, data.contributorCount);
                 
                 console.log('Données centralisées chargées:', data);
             } catch (error) {
                 console.error('Erreur lors du chargement des données centralisées:', error);
-                // Afficher un message d'erreur dans le compteur
-                document.getElementById('totalAmount').textContent = 'Erreur de chargement';
-                document.getElementById('contributorCount').textContent = '-';
-                
-                // Afficher l'erreur dans la console pour le débogage
-                console.error('Détails de l\'erreur:', error);
+                // Fallback sur les données locales en cas d'erreur
+                loadLocalCagnotteData();
             }
         }
+        
+        // Fonction pour charger les données depuis le stockage local
+        function loadLocalCagnotteData() {
+            const contributions = JSON.parse(localStorage.getItem('contributions') || '[]');
+            let totalEur = 0;
+            let totalMad = 0;
+            let contributorCount = contributions.length;
 
-        function updateCagnotteDisplay(totalEur, count, percentComplete) {
+            contributions.forEach(contrib => {
+                const amount = parseFloat(contrib.montant) || 0;
+                if (contrib.devise === 'euro') {
+                    totalEur += amount;
+                } else if (contrib.devise === 'dirham') {
+                    totalMad += amount;
+                }
+            });
+
+            // Convertir tout en euros pour l'affichage principal
+            const totalEurEquivalent = totalEur + (totalMad / EXCHANGE_RATE);
+            
+            updateCagnotteDisplay(totalEurEquivalent, contributorCount);
+        }
+
+        function updateCagnotteDisplay(totalEur, count) {
             // Mettre à jour l'affichage
             document.getElementById('totalAmount').textContent = `${Math.round(totalEur)} €`;
             document.getElementById('contributorCount').textContent = count;
             
             // Calculer et afficher le pourcentage
-            const percentage = percentComplete || Math.min((totalEur / OBJECTIVE_EUR) * 100, 100);
+            const percentage = Math.min((totalEur / OBJECTIVE_EUR) * 100, 100);
             document.getElementById('progressFill').style.width = `${percentage}%`;
         }
 
-        // Fonction pour rafraîchir manuellement les statistiques
-        function refreshStats() {
-            document.getElementById('totalAmount').innerHTML = '<div class="loading-spinner"></div> Chargement...';
-            document.getElementById('contributorCount').innerHTML = '<div class="loading-spinner"></div>';
-            fetchCentralizedData();
+        function addContribution(data) {
+            // Ajouter la contribution au localStorage
+            const contributions = JSON.parse(localStorage.getItem('contributions') || '[]');
+            contributions.push(data);
+            localStorage.setItem('contributions', JSON.stringify(contributions));
+            
+            // Mettre à jour l'affichage
+            loadCagnotteData();
+        }
+
+        // Fonction pour réinitialiser le compteur local
+        function resetLocalCounter() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser le compteur local ? Cette action ne peut pas être annulée.')) {
+                localStorage.removeItem('contributions');
+                alert('Compteur local réinitialisé avec succès. La page va être rechargée.');
+                window.location.reload();
+            }
         }
         
         // Fonction pour afficher le panneau d'administration
@@ -740,8 +742,15 @@
         
         // Fonction pour mettre à jour les informations du panneau d'administration
         function updateAdminPanel() {
+            const apiStatus = document.getElementById('apiStatus');
             const apiUrl = document.getElementById('apiUrl');
+            const localContribCount = document.getElementById('localContribCount');
+            
+            if (apiStatus) apiStatus.textContent = USE_CENTRALIZED_COUNTER ? 'Activé' : 'Désactivé';
             if (apiUrl) apiUrl.textContent = COUNTER_API_URL;
+            
+            const contributions = JSON.parse(localStorage.getItem('contributions') || '[]');
+            if (localContribCount) localContribCount.textContent = contributions.length;
         }
         
         // Charger les données au démarrage
@@ -787,7 +796,7 @@
             
             // Remplir les détails
             document.getElementById('confirmName').textContent = `${data.prenom} ${data.nom}`;
-            document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise === 'euro' ? '€' : 'MAD'}`;
+            document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise.toUpperCase()}`;
             document.getElementById('confirmEmail').textContent = data.email;
             
             // Afficher le RIB correspondant
@@ -832,9 +841,6 @@
             document.querySelectorAll('.rib-info').forEach(rib => {
                 rib.classList.remove('show');
             });
-            
-            // Rafraîchir les données
-            loadCagnotteData();
         }
 
         // Gestion du formulaire
@@ -847,7 +853,7 @@
             
             // Désactiver le bouton et afficher le loading
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading-spinner"></div> Envoi en cours...';
+            submitBtn.textContent = 'Envoi en cours...';
             
             // Masquer les messages précédents
             successMessage.style.display = 'none';
@@ -868,6 +874,15 @@
             };
             
             try {
+                // Vérifier si Zapier est configuré
+                if (ZAPIER_WEBHOOK_URL === 'YOUR_ZAPIER_WEBHOOK_URL_HERE') {
+                    // Mode démo - ajouter à la cagnotte et afficher directement la confirmation
+                    console.log('Mode démo - Zapier non configuré');
+                    addContribution(data);
+                    showConfirmation(data);
+                    return;
+                }
+
                 // Envoyer les données à Zapier
                 console.log('Envoi des données à Zapier:', data);
                 const response = await fetch(ZAPIER_WEBHOOK_URL, {
@@ -883,13 +898,7 @@
                 
                 // Comme mode: 'no-cors' ne permet pas de vérifier le statut,
                 // on considère que l'envoi a réussi
-                
-                // Rafraîchir les données du compteur
-                setTimeout(() => {
-                    fetchCentralizedData();
-                }, 2000); // Attendre 2 secondes pour laisser le temps à Google Sheets de se mettre à jour
-                
-                // Afficher la confirmation
+                addContribution(data);
                 showConfirmation(data);
                 
             } catch (error) {
@@ -910,9 +919,12 @@
                 errorMessage.innerHTML = errorText;
                 errorMessage.style.display = 'block';
                 
-                // Proposer d'afficher quand même la confirmation
+                // Sauvegarde locale en cas d'erreur
+                addContribution(data);
+                
+                // Proposer d'afficher quand même la confirmation en mode démo
                 setTimeout(() => {
-                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Votre contribution n\'a pas été enregistrée)')) {
+                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Les données sont sauvegardées localement)')) {
                         showConfirmation(data);
                     }
                 }, 2000);
@@ -920,10 +932,9 @@
             } finally {
                 // Réactiver le bouton
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Confirmer ma contribution';
+                submitBtn.textContent = 'Confirmer ma contribution';
             }
         });
     </script>
 </body>
 </html>
-
