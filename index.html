@@ -720,6 +720,7 @@
                 showLoadingError(error.message);
             }
         }
+
         // Fonction pour afficher les erreurs de chargement
         function showLoadingError(errorMessage) {
             document.getElementById('totalAmount').textContent = '--- €';
@@ -754,6 +755,7 @@
                 </button>
             `;
         }
+
         // Fonction pour afficher l'heure de dernière mise à jour
         function showLastUpdateTime() {
             const now = new Date();
@@ -774,6 +776,7 @@
             
             updateDiv.textContent = `Dernière actualisation: ${timeString}`;
         }
+
         function updateCagnotteDisplay(totalEur, count, percentComplete) {
             // Supprimer le message d'erreur s'il existe
             const errorDiv = document.getElementById('loading-error');
@@ -789,6 +792,7 @@
             const percentage = percentComplete || Math.min((totalEur / OBJECTIVE_EUR) * 100, 100);
             document.getElementById('progressFill').style.width = `${Math.round(percentage)}%`;
         }
+
         // Fonction pour rafraîchir manuellement les statistiques
         function refreshStats() {
             document.getElementById('totalAmount').innerHTML = '<div class="loading-spinner"></div> Chargement...';
@@ -825,6 +829,7 @@
             // Rafraîchir les données toutes les 2 minutes
             setInterval(loadCagnotteData, 120000);
         });
+
         // Gestion de la sélection de devise
         document.querySelectorAll('.currency-option').forEach(option => {
             option.addEventListener('click', function() {
@@ -847,7 +852,8 @@
                 
                 document.getElementById(`rib-${currency}`).classList.add('show');
             });
-        };
+        });
+
         // Fonction pour afficher la page de confirmation
         function showConfirmation(data) {
             // Masquer le formulaire
@@ -891,6 +897,7 @@
                 `;
             }
         }
+
         // Fonction pour réinitialiser le formulaire
         function resetForm() {
             document.querySelector('.header').style.display = 'block';
@@ -907,6 +914,7 @@
             // Rafraîchir les données
             loadCagnotteData();
         }
+
         // Gestion du formulaire
         document.getElementById('contributionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -964,7 +972,7 @@
                 console.error('Erreur détaillée:', error);
                 
                 // Afficher une erreur détaillée
-                let errorText = '⚠️ Erreur lors de l'envoi : ';
+                let errorText = '⚠️ Erreur lors de l\'envoi : ';
                 if (error.name === 'TypeError' && error.message.includes('fetch')) {
                     errorText += 'Problème de connexion réseau. Vérifiez votre connexion internet.';
                 } else if (error.message.includes('404')) {
@@ -980,7 +988,7 @@
                 
                 // Proposer d'afficher quand même la confirmation
                 setTimeout(() => {
-                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Votre contribution n'a pas été enregistrée)')) {
+                    if (confirm('Voulez-vous voir un aperçu de la confirmation ? (Votre contribution n\'a pas été enregistrée)')) {
                         showConfirmation(data);
                     }
                 }, 2000);
@@ -990,7 +998,7 @@
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Confirmer ma contribution';
             }
-        };
+        });
     </script>
 
 </body>
