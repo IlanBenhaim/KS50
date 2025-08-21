@@ -8,6 +8,47 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+    	
+    	/* --- Fix mobile iPhone: stats qui débordent/cassent --- */
+
+/* Empêche la valeur de se couper caractère par caractère */
+#totalAmountEUR,
+#totalAmountMAD,
+#contributorCount,
+#last-update-time {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Le conteneur ne doit pas forcer la casse */
+.stat-box,
+.last-update-box {
+  word-break: normal !important;
+  overflow: hidden;              /* évite les débordements visuels */
+  text-overflow: ellipsis;       /* tronque proprement si besoin */
+  min-width: 0;                  /* autorise le shrink dans la grille */
+}
+
+/* Sur mobile: on empile les cartes = 1 colonne, plus de souci de largeur */
+@media (max-width: 480px) {
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr !important;  /* 1 colonne */
+    gap: 12px;
+  }
+  .stat-box {
+    padding: 16px;
+  }
+  .stat-box strong {
+    font-size: 1.35rem;          /* un peu plus petit pour respirer */
+    line-height: 1.1;
+  }
+  .last-update-box {
+    font-size: 0.9rem;           /* info moins prioritaire */
+  }
+}
+    	
+    	
         * {
             margin: 0;
             padding: 0;
