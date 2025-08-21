@@ -642,25 +642,25 @@
                     <div class="rib-info" id="rib-euro">
                         <h3>💶 Paiement en France</h3>
                         <div class="rib-details">
-                            <p><strong>Bénéficiaire :</strong> M. ILAN BEN HAIM</p>
+                            <p><strong>Bénéficiaire :</strong> M. ILAN BENHAIM</p>
                             <p><strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445</p>
                             <p><strong>BIC :</strong> SOGEFRPP</p>
                             <p><strong>Banque :</strong> Société Générale</p>
                             <p><strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)</p>
-                            <p><strong>Motif :</strong> Cadeau Kamal & Sabry</p>
+                            <p><strong>Motif :</strong> Cadeau Kamal & Sabry / VOTRE NOM</p>
                         </div>
                     </div>
                     
                     <div class="rib-info" id="rib-dirham">
                         <h3>🇲🇦 Paiement au Maroc</h3>
                         <div class="rib-details">
-                            <p><strong>Bénéficiaire :</strong> BENHAIM ILAN ICHOA</p>
+                            <p><strong>Bénéficiaire :</strong> ILAN ICHOA BENHAIM </p>
                             <p><strong>RIB :</strong> 007 780 0002438000489014 81</p>
                             <p><strong>IBAN :</strong> MA64 007 780 0002438000489014 81</p>
                             <p><strong>BIC :</strong> BCMAMAMC</p>
                             <p><strong>Banque :</strong> AttijariWafa bank</p>
                             <p><strong>Agence :</strong> Casa Av. du Phare (0243)</p>
-                            <p><strong>Motif :</strong> Cadeau Kamal & Sabry</p>
+                            <p><strong>Motif :</strong> Cadeau Kamal & Sabry / VOTRE NOM</p>
                         </div>
                     </div>
                 </div>
@@ -866,6 +866,142 @@ function showLastUpdateTime(lastUpdate) {
   const lastBox = document.getElementById('last-update-time')?.closest('.stat-box');
   if (lastBox) lastBox.classList.add('last-update-box');
 });
+
+// =========================
+  // Gestion devise
+  // =========================
+  document.querySelectorAll('.currency-option').forEach(option => {
+    option.addEventListener('click', function() {
+      const currency = this.dataset.currency;
+      const radio = this.querySelector('input[type="radio"]');
+
+      document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+      this.classList.add('selected');
+      if (radio) radio.checked = true;
+
+      document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
+      const ribBox = document.getElementById(`rib-${currency}`);
+      if (ribBox) ribBox.classList.add('show');
+    });
+  });
+
+  // =========================
+  // Page de confirmation
+  // =========================
+  function showConfirmation(data) {
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.form-container').style.display = 'none';
+    document.getElementById('confirmationPage').classList.add('show');
+
+    document.getElementById('confirmName').textContent = `${data.prenom} ${data.nom}`;
+    document.getElementById('confirmAmount').textContent = `${data.montant} ${data.devise === 'euro' ? '€' : 'MAD'}`;
+    document.getElementById('confirmEmail').textContent = data.email;
+
+    const ribContainer = document.getElementById('confirmRib');
+    if (data.devise === 'euro') {
+      ribContainer.innerHTML = `
+        <h3>💶 Informations de paiement - France</h3>
+        <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
+          <strong>Bénéficiaire :</strong> M. ILAN BENHAIM<br>
+          <strong>IBAN :</strong> FR76 3000 3031 1100 0500 2894 445<br>
+          <strong>BIC :</strong> SOGEFRPP<br>
+          <strong>Banque :</strong> Société Générale<br>
+          <strong>Domiciliation :</strong> PARIS IDFN PRIV BK G (03038)<br>
+          <strong>Motif :</strong> Cadeau Kamal & Sabry / VOTRE NOM
+        </div>
+      `;
+    } else {
+      ribContainer.innerHTML = `
+        <h3>🇲🇦 Informations de paiement - Maroc</h3>
+        <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; line-height: 1.8;">
+          <strong>Bénéficiaire :</strong>ILAN ICHOA BENHAIM<br>
+          <strong>RIB :</strong> 007 780 0002438000489014 81<br>
+          <strong>IBAN :</strong> MA64 007 780 0002438000489014 81<br>
+          <strong>BIC :</strong> BCMAMAMC<br>
+          <strong>Banque :</strong> AttijariWafa bank<br>
+          <strong>Agence :</strong> Casa Av. du Phare (0243)<br>
+          <strong>Motif :</strong> Cadeau Kamal & Sabry / VOTRE NOM
+        </div>
+      `;
+    }
+  }
+
+  function resetForm() {
+    document.querySelector('.header').style.display = 'block';
+    document.querySelector('.form-container').style.display = 'block';
+    document.getElementById('confirmationPage').classList.remove('show');
+    document.getElementById('contributionForm').reset();
+
+    document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+    document.querySelectorAll('.rib-info').forEach(rib => rib.classList.remove('show'));
+
+    loadCagnotteData();
+  }
+
+  function showAdminPanel() {
+    const adminPanel = document.getElementById('adminPanel');
+    if (adminPanel) {
+      adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+      updateAdminPanel();
+    }
+  }
+
+  // =========================
+  // Soumission du formulaire (Zapier)
+  // =========================
+  document.getElementById('contributionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submitBtn');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="loading-spinner"></div> Envoi en cours...';
+    successMessage.style.display = 'none';
+    errorMessage.style.display = 'none';
+
+    const formData = new FormData(this);
+    const data = {
+      prenom: formData.get('prenom'),
+      nom: formData.get('nom'),
+      email: formData.get('email'),
+      phonePrefix: formData.get('phonePrefix'),
+      telephone: formData.get('telephone'),
+      telephoneComplet: (formData.get('phonePrefix') || '') + (formData.get('telephone') || ''),
+      montant: formData.get('montant'),
+      devise: formData.get('devise'),
+      timestamp: new Date().toLocaleString('fr-FR')
+    };
+
+    try {
+      await fetch(ZAPIER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        mode: 'no-cors'
+      });
+
+      showConfirmation(data);
+      setTimeout(() => fetchCentralizedData(), 3000);
+
+    } catch (error) {
+      console.error('Erreur détaillée:', error);
+      let errorText = 'Erreur lors de l\'envoi : ';
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorText += 'Problème de connexion réseau.';
+      } else {
+        errorText += error.message || 'Erreur inconnue.';
+      }
+      errorMessage.innerHTML = errorText;
+      errorMessage.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Confirmer ma contribution';
+    }
+  });
+
+
 </script>
    
 </body>
