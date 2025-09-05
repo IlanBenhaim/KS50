@@ -1002,6 +1002,112 @@ function showLastUpdateTime(lastUpdate) {
   });
 
 
+// Script de fermeture automatique - À ajouter à la fin de votre script existant
+
+// =========================
+// Fermeture automatique du formulaire
+// =========================
+function checkFormClosure() {
+  // Date de fermeture : vendredi 6 septembre 2025 à 00:00 (heure française)
+  const closureDate = new Date('2025-09-06T00:00:00+02:00'); // +02:00 pour l'heure française (CEST)
+  const now = new Date();
+  
+  console.log('Vérification fermeture:', {
+    maintenant: now.toLocaleString('fr-FR'),
+    fermeture: closureDate.toLocaleString('fr-FR'),
+    fermé: now >= closureDate
+  });
+  
+  if (now >= closureDate) {
+    closeFormulaire();
+  }
+}
+
+function closeFormulaire() {
+  console.log('🔒 Fermeture automatique du formulaire');
+  
+  // 1. Masquer le formulaire et les éléments de participation
+  const elementsToHide = [
+    '.form-container',           // Le formulaire principal
+   // '.cagnotte-counter',         // Le compteur (optionnel)
+    '.introduction'              // L'introduction (optionnel)
+  ];
+  
+  elementsToHide.forEach(selector => {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.style.display = 'none';
+    }
+  });
+  
+  // 2. Afficher le message de fermeture
+  showClosureMessage();
+}
+
+function showClosureMessage() {
+  // Créer le message de fermeture
+  const messageHTML = `
+    <div id="closure-message" style="
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      padding: 40px 30px;
+      margin: 30px 0;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+      border: 2px solid #c0392b;
+    ">
+      <h2 style="
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: white;
+      ">🔒 Contributions fermées</h2>
+      
+      <p style="
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        opacity: 0.95;
+      ">Les contributions pour la cagnotte sont maintenant fermées.</p>
+      
+      <p style="
+        font-size: 1.1rem;
+        opacity: 0.9;
+      ">Merci à tous les participants pour votre générosité !</p>
+      
+      <div style="
+        margin-top: 25px;
+        padding: 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        font-size: 1.1rem;
+      ">
+        🎉 <strong>Rendez-vous les 19-20 septembre à Bin El Ouidane</strong> 🎉
+      </div>
+    </div>
+  `;
+  
+  // Insérer le message après le header
+  const header = document.querySelector('.header');
+  if (header) {
+    header.insertAdjacentHTML('afterend', messageHTML);
+  }
+}
+
+// Vérifier immédiatement au chargement
+document.addEventListener('DOMContentLoaded', function() {
+  checkFormClosure();
+});
+
+// Vérifier toutes les minutes (au cas où la page reste ouverte)
+setInterval(checkFormClosure, 60000);
+
+// Optionnel : fonction pour tester manuellement la fermeture
+window.testFormClosure = function() {
+  console.log('🧪 Test de fermeture manuelle');
+  closeFormulaire();
+};
+
 </script>
    
 </body>
